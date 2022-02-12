@@ -1,6 +1,7 @@
 # Smiley NFT App
 
 ### Demo
+https://smiley-nft-app.vercel.app/
 
 ### Description
 I just launched my own NFT! Follow the website above to mint your own randomly generated smiley face NFT on the Rinkeby Testnet.
