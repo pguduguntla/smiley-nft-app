@@ -6,6 +6,7 @@ const CONTRACT_ADDRESS = "0x56096dD80E8e423a94b8616F449A2E3482BA6539";
 
 export const Main = () => {
   const [currentAccount, setCurrentAccount] = useState("");
+  const [minted, setMinted] = useState(null);
 
   const setupEventListener = async () => {
     // Most of this looks the same as our function askContractToMintNft
@@ -27,8 +28,8 @@ export const Main = () => {
         // If you're familiar with webhooks, it's very similar to that!
         connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
           console.log(from, tokenId.toNumber());
-          alert(
-            `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
+          setMinted(
+            `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
           );
         });
 
@@ -85,7 +86,6 @@ export const Main = () => {
   };
 
   const askContractToMintNft = async () => {
-
     try {
       const { ethereum } = window;
 
@@ -130,33 +130,69 @@ export const Main = () => {
           and generate your own smiley face NFT.
         </p>
       </div>
-      {currentAccount === "" ? (
-        <Button
-          text="Connect your wallet &rarr;"
-          onClick={connectWallet}
-          primary={true}
-        />
-      ) : (
-        <Button
-          onClick={askContractToMintNft}
-          text="Mint your NFT &rarr;"
-          primary={false}
-        />
+      <div className="mb-12">
+        {currentAccount === "" ? (
+          <Button
+            minted={minted}
+            text="Connect your wallet &rarr;"
+            onClick={connectWallet}
+            primary={true}
+          />
+        ) : (
+          <Button
+            minted={minted}
+            onClick={() => {
+              askContractToMintNft();
+              setMinted("loading");
+            }}
+            text="Mint your NFT &rarr;"
+            primary={false}
+          />
+        )}
+      </div>
+      {minted && minted != "loading" && (
+        <div className="bg-gray-800 p-6 rounded-lg">
+          <p className="text-2xl font-bold">Your NFT is ready!</p>
+          <p className="text-lg mb-6">
+            It may take up to 10 minutes to display on OpenSea, but your NFT has
+            been created!
+          </p>
+          <a
+            href={minted}
+            target="_blank"
+            className={`w-48 text-center relative px-7 py-4 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full leading-none flex items-center divide-x divide-gray-600`}
+          >
+            <span class="text-white w-48 mx-auto border-none font-bold group-hover:text-gray-100 transition duration-200">
+              Go to OpenSea
+            </span>
+          </a>
+        </div>
       )}
     </div>
   );
 };
 
-const Button = ({ text, onClick, primary }) => {
+const Button = ({ text, onClick, primary, minted }) => {
   return (
     <div class="relative group">
       <button
         onClick={onClick}
-        class={`relative px-7 py-4 bg-gradient-to-r ${
-          primary ? `from-blue-400 to-blue-500` : `from-blue-400 to-purple-500`
-        } rounded-lg leading-none flex items-center divide-x divide-gray-600`}
+        className={`relative px-7 py-4 bg-gradient-to-r ${
+          primary ? `from-blue-400 to-blue-600` : `from-indigo-500 to-blue-500`
+        } rounded-full leading-none flex items-center divide-x divide-gray-600`}
+        disabled={minted == "loading"}
       >
-        <span class="text-white  font-bold group-hover:text-gray-100 transition duration-200">
+        {minted == "loading" && (
+          <div>
+            <div
+              style={{ borderTopColor: "transparent" }}
+              className="w-6 h-6 border-2 border-white border-solid rounded-full animate-spin mr-4"
+            >
+              {" "}
+            </div>
+          </div>
+        )}
+        <span class="text-white border-none font-bold group-hover:text-gray-100 transition duration-200">
           {text}
         </span>
       </button>
